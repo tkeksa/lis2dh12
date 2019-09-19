@@ -1,5 +1,7 @@
 # `lis2dh12`
 
+[![Crate][crate-image]][crate-link]
+[![Docs][docs-image]][docs-link]
 [![Build Status][build-image]][build-link]
 [![dependency status][deps-image]][deps-link]
 ![MIT licensed][license-image]
@@ -19,6 +21,10 @@ Dual licensed under your choice of either of:
  - MIT license ([LICENSE-MIT](LICENSE-MIT) or
    http://opensource.org/licenses/MIT)
 
+[crate-image]: https://img.shields.io/crates/v/lis2dh12.svg
+[crate-link]: https://crates.io/crates/lis2dh12
+[docs-image]: https://docs.rs/lis2dh12/badge.svg
+[docs-link]: https://docs.rs/lis2dh12/
 [build-image]: https://github.com/tkeksa/lis2dh12/workflows/ci/badge.svg
 [build-link]: https://github.com/tkeksa/lis2dh12/actions
 [deps-image]: https://deps.rs/repo/github/tkeksa/lis2dh12/status.svg
