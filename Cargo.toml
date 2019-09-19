@@ -23,7 +23,7 @@ default-features = false
 version = "0.2"
 
 [dev-dependencies]
-embedded-hal-mock = "0.4"
+embedded-hal-mock = "0.7"
 
 [profile.release]
 lto = true
