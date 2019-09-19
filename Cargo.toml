@@ -1,6 +1,6 @@
 [package]
 name = "lis2dh12"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["Tomas Kukosa <tkeksa@gmail.com>"]
 repository = "https://github.com/tkeksa/lis2dh12"
 license = "Apache-2.0 OR MIT"
