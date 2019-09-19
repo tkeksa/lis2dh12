@@ -1,0 +1,55 @@
+name: ci
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+         ftr: [--no-default-features, --all-features]
+    
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Install components
+      run: rustup component add --toolchain stable rustfmt clippy
+
+    - name: Fetch
+      uses: actions-rs/cargo@v1
+      with:
+        command: fetch
+
+    - name: Format
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+
+    - name: Check
+      uses: actions-rs/cargo@v1
+      with:
+        command: check
+        args: ${{ matrix.ftr }}
+
+    - name: Clippy
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: ${{ matrix.ftr }} -- -D warnings
+
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: ${{ matrix.ftr }}
+
+    - name: Test
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+        args: ${{ matrix.ftr }}
