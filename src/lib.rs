@@ -13,6 +13,7 @@
 mod reg;
 
 use core::fmt::Debug;
+use core::marker::PhantomData;
 
 #[cfg(feature = "out_f32")]
 pub use accelerometer::F32x3;
@@ -24,7 +25,7 @@ use embedded_hal as hal;
 use hal::blocking::i2c::{Write, WriteRead};
 
 use crate::reg::*;
-pub use crate::reg::{FifoMode, FullScale, Mode, Odr};
+pub use crate::reg::{Aoi6d, FifoMode, FullScale, Mode, Odr};
 
 /// Possible slave addresses
 pub enum SlaveAddr {
@@ -65,6 +66,12 @@ pub struct Lis2dh12<I2C> {
     addr: u8,
     /// Current full-scale
     fs: FullScale,
+}
+
+/// Interrupt setting and status
+pub struct Int<'a, REG, I2C> {
+    dev: &'a mut Lis2dh12<I2C>,
+    reg: PhantomData<REG>,
 }
 
 impl<I2C, E> Lis2dh12<I2C>
@@ -139,17 +146,53 @@ where
     pub fn enable_axis(&mut self, (x, y, z): (bool, bool, bool)) -> Result<(), Error<E>> {
         self.modify_reg(Register::CTRL_REG1, |mut v| {
             v &= !(Xen | Yen | Zen); // disable all axises
-            if x {
-                v |= Xen;
-            }
-            if y {
-                v |= Yen;
-            }
-            if z {
-                v |= Zen;
-            }
+            v |= if x { Xen } else { 0 };
+            v |= if y { Yen } else { 0 };
+            v |= if z { Zen } else { 0 };
             v
         })?;
+        Ok(())
+    }
+
+    /// `CLICK` interrupt on `INT1` pin,
+    /// `CTRL_REG3`: `I1_CLICK`
+    pub fn enable_i1_click(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG3, I1_CLICK, enable)?;
+        Ok(())
+    }
+
+    /// `IA1` interrupt on `INT1` pin,
+    /// `CTRL_REG3`: `I1_IA1`
+    pub fn enable_i1_ia1(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG3, I1_IA1, enable)?;
+        Ok(())
+    }
+
+    /// `IA2` interrupt on `INT1` pin,
+    /// `CTRL_REG3`: `I1_IA2`
+    pub fn enable_i1_ia2(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG3, I1_IA2, enable)?;
+        Ok(())
+    }
+
+    /// `ZYXDA` interrupt on `INT1` pin,
+    /// `CTRL_REG3`: `I2_ZYXDA`
+    pub fn enable_i1_zyxda(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG3, I1_ZYXDA, enable)?;
+        Ok(())
+    }
+
+    /// FIFO watermark on `INT1` pin,
+    /// `CTRL_REG3`: `I2_ZYXDA`
+    pub fn enable_i1_wtm(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG3, I1_WTM, enable)?;
+        Ok(())
+    }
+
+    /// FIFO overrun on `INT1` pin,
+    /// `CTRL_REG3`: `I1_OVERRUN`
+    pub fn enable_i1_overrun(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG3, I1_OVERRUN, enable)?;
         Ok(())
     }
 
@@ -168,10 +211,98 @@ where
         Ok(())
     }
 
+    /// Reboot memory content,
+    /// `CTRL_REG5`: `BOOT`
+    pub fn reboot(&mut self, reboot: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG5, BOOT, reboot)?;
+        Ok(())
+    }
+
+    /// In boot,
+    /// `CTRL_REG5`: `BOOT`
+    pub fn in_boot(&mut self) -> Result<bool, Error<E>> {
+        let reg = self.read_reg(Register::CTRL_REG5)?;
+        Ok((reg & BOOT) != 0)
+    }
+
     /// FIFO enable,
     /// `CTRL_REG5`: `FIFO_EN`
     pub fn enable_fifo(&mut self, enable: bool) -> Result<(), Error<E>> {
         self.reg_xset_bits(Register::CTRL_REG5, FIFO_EN, enable)?;
+        Ok(())
+    }
+
+    /// Latch interrupt request on INT1_SRC (31h),
+    /// with INT1_SRC (31h) register cleared by reading INT1_SRC (31h) itself,
+    /// `CTRL_REG5`: `LIR_INT1`
+    pub fn enable_lir_int1(&mut self, latch: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG5, LIR_INT1, latch)?;
+        Ok(())
+    }
+
+    /// 4D enable: 4D detection is enabled on INT1 pin
+    /// when 6D bit on INT1_CFG (30h) is set to 1,
+    /// `CTRL_REG5`: `D4D_INT1`
+    pub fn enable_d4d_int1(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG5, D4D_INT1, enable)?;
+        Ok(())
+    }
+
+    /// Latch interrupt request on INT2_SRC (35h) register,
+    /// with INT2_SRC (35h) register cleared by reading INT2_SRC (35h) itself,
+    /// `CTRL_REG5`: `LIR_INT2`
+    pub fn enable_lir_int2(&mut self, latch: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG5, LIR_INT2, latch)?;
+        Ok(())
+    }
+
+    /// 4D enable: 4D detection is enabled on INT2 pin
+    /// when 6D bit on INT2_CFG (34h) is set to 1,
+    /// `CTRL_REG5`: `D4D_INT2`
+    pub fn enable_d4d_int2(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG5, D4D_INT2, enable)?;
+        Ok(())
+    }
+
+    /// `CLICK` interrupt on `INT2` pin,
+    /// `CTRL_REG6`: `I2_CLICK`
+    pub fn enable_i2_click(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG6, I2_CLICK, enable)?;
+        Ok(())
+    }
+
+    /// `IA1` interrupt on `INT2` pin,
+    /// `CTRL_REG6`: `I2_IA1`
+    pub fn enable_i2_ia1(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG6, I2_IA1, enable)?;
+        Ok(())
+    }
+
+    /// `IA2` interrupt on `INT2` pin,
+    /// `CTRL_REG6`: `I2_IA2`
+    pub fn enable_i2_ia2(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG6, I2_IA2, enable)?;
+        Ok(())
+    }
+
+    /// Boot interrupt on `INT2` pin,
+    /// `CTRL_REG6`: `I2_BOOT`
+    pub fn enable_i2_boot(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG6, I2_BOOT, enable)?;
+        Ok(())
+    }
+
+    /// Activity interrupt on `INT2` pin,
+    /// `CTRL_REG6`: `I2_ACT`
+    pub fn enable_i2_act(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG6, I2_ACT, enable)?;
+        Ok(())
+    }
+
+    /// INT1/INT2 pin polarity,
+    /// `CTRL_REG6`: `INT_POLARITY`
+    pub fn set_int_polarity(&mut self, active_low: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG6, INT_POLARITY, active_low)?;
         Ok(())
     }
 
@@ -245,10 +376,27 @@ where
     }
 
     /// `REFERENCE` register
+    pub fn set_ref(&mut self, reference: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::REFERENCE, reference)?;
+        Ok(())
+    }
+
+    /// `REFERENCE` register
     pub fn get_ref(&mut self) -> Result<u8, Error<E>> {
         self.read_reg(Register::REFERENCE).map_err(Into::into)
     }
 
+    /// INT1
+    pub fn int1(&mut self) -> Int<Int1Regs, I2C> {
+        Int::new(self)
+    }
+
+    /// INT2
+    pub fn int2(&mut self) -> Int<Int2Regs, I2C> {
+        Int::new(self)
+    }
+
+    /// Dump registers
     #[allow(dead_code)]
     fn dump_regs<W>(&mut self, w: &mut W) -> Result<(), Error<E>>
     where
@@ -256,14 +404,44 @@ where
     {
         writeln!(
             w,
-            "CTRL_REG1 = {:#010b}",
+            "CTRL_REG1 (20h) = {:#010b}",
             self.read_reg(Register::CTRL_REG1)?
         )
         .unwrap();
         writeln!(
             w,
-            "CTRL_REG4 = {:#010b}",
+            "CTRL_REG3 (22h) = {:#010b}",
+            self.read_reg(Register::CTRL_REG3)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "CTRL_REG4 (23h) = {:#010b}",
             self.read_reg(Register::CTRL_REG4)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "CTRL_REG5 (24h) = {:#010b}",
+            self.read_reg(Register::CTRL_REG5)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "CTRL_REG6 (25h) = {:#010b}",
+            self.read_reg(Register::CTRL_REG6)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "INT1_CFG (30h) = {:#010b}",
+            self.read_reg(Register::INT1_CFG)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "INT1_THS (32h) = {:#010b}",
+            self.read_reg(Register::INT1_THS)?
         )
         .unwrap();
         Ok(())
@@ -354,5 +532,92 @@ where
             self.fs.convert_i16tof32(acc.y),
             self.fs.convert_i16tof32(acc.z),
         ))
+    }
+}
+
+impl<'a, REG, I2C, E> Int<'a, REG, I2C>
+where
+    REG: IntRegs,
+    I2C: WriteRead<Error = E> + Write<Error = E>,
+    E: Debug,
+{
+    fn new(dev: &'a mut Lis2dh12<I2C>) -> Self {
+        Self {
+            dev,
+            reg: PhantomData,
+        }
+    }
+
+    /// Disable interrupt,
+    /// `INTx_CFG` clean all bits
+    pub fn disable(&mut self) -> Result<(), Error<E>> {
+        self.dev.write_reg(REG::reg_cfg(), 0x00)?;
+        Ok(())
+    }
+
+    /// AOI-6D Interrupt mode,
+    /// `INTx_CFG`: `AOI`, `6D`
+    pub fn set_mode(&mut self, mode: Aoi6d) -> Result<(), Error<E>> {
+        self.dev
+            .modify_reg(REG::reg_cfg(), |v| (v & !AOI_6D_MASK) | ((mode as u8) << 6))?;
+        Ok(())
+    }
+
+    /// X,Y,Z high event enable,
+    /// `INTx_CFG`: `XHIE`, `YHIE`, `ZHIE`
+    pub fn enable_high(&mut self, (x, y, z): (bool, bool, bool)) -> Result<(), Error<E>> {
+        self.dev.modify_reg(REG::reg_cfg(), |mut v| {
+            v &= !(XHIE | YHIE | ZHIE); // disable all axises
+            v |= if x { XHIE } else { 0 };
+            v |= if y { YHIE } else { 0 };
+            v |= if z { ZHIE } else { 0 };
+            v
+        })?;
+        Ok(())
+    }
+
+    /// X,Y,Z low event enable,
+    /// `INTx_CFG`: `XLIE`, `YLIE`, `ZLIE`
+    pub fn enable_low(&mut self, (x, y, z): (bool, bool, bool)) -> Result<(), Error<E>> {
+        self.dev.modify_reg(REG::reg_cfg(), |mut v| {
+            v &= !(XLIE | YLIE | ZLIE); // disable all axises
+            v |= if x { XLIE } else { 0 };
+            v |= if y { YLIE } else { 0 };
+            v |= if z { ZLIE } else { 0 };
+            v
+        })?;
+        Ok(())
+    }
+
+    /// Source,
+    /// `INTx_SRC` decoded as ((`XH`, `XL`), (`YH`, `YL`), (`ZH`, `ZL`))
+    #[allow(clippy::type_complexity)]
+    pub fn get_src(
+        &mut self,
+    ) -> Result<Option<((bool, bool), (bool, bool), (bool, bool))>, Error<E>> {
+        let reg = self.dev.read_reg(REG::reg_src())?;
+        if (reg & IA) != 0 {
+            Ok(Some((
+                ((reg & XH) != 0, (reg & XL) != 0),
+                ((reg & YH) != 0, (reg & YL) != 0),
+                ((reg & ZH) != 0, (reg & ZL) != 0),
+            )))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Threshold,
+    /// `INTx_THS`: `THS`
+    pub fn set_ths(&mut self, ths: u8) -> Result<(), Error<E>> {
+        self.dev.write_reg(REG::reg_ths(), ths & THS_MASK)?;
+        Ok(())
+    }
+
+    /// Duration,
+    /// `INTx_SRC`: `D`
+    pub fn set_duration(&mut self, d: u8) -> Result<(), Error<E>> {
+        self.dev.write_reg(REG::reg_duration(), d & D_MASK)?;
+        Ok(())
     }
 }
