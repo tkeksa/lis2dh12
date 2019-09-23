@@ -11,6 +11,7 @@ Platform-agnostic Rust driver for the LIS2DH12 accelerometer
 ## Resources
 - [LIS2DH12 product page][product-page]
 - [LIS2DH12 datasheet][datasheet]
+- [LIS2DH12 application note (AN5005)][app-note]
 
 ## License
 
@@ -32,3 +33,4 @@ Dual licensed under your choice of either of:
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [product-page]: https://www.st.com/en/mems-and-sensors/lis2dh12.html
 [datasheet]: https://www.st.com/resource/en/datasheet/lis2dh12.pdf
+[app-note]: https://www.st.com/resource/en/application_note/dm00365457.pdf
