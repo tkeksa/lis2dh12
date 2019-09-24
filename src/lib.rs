@@ -397,8 +397,8 @@ where
     }
 
     /// Dump registers
-    #[allow(dead_code)]
-    fn dump_regs<W>(&mut self, w: &mut W) -> Result<(), Error<E>>
+    #[cfg(debug_assertions)]
+    pub fn dump_regs<W>(&mut self, w: &mut W) -> Result<(), Error<E>>
     where
         W: core::fmt::Write,
     {
@@ -528,9 +528,9 @@ where
         let acc: I16x3 = self.acceleration()?;
 
         Ok(F32x3::new(
-            self.fs.convert_i16tof32(acc.x),
-            self.fs.convert_i16tof32(acc.y),
-            self.fs.convert_i16tof32(acc.z),
+            self.fs.convert_out_i16tof32(acc.x),
+            self.fs.convert_out_i16tof32(acc.y),
+            self.fs.convert_out_i16tof32(acc.z),
         ))
     }
 }
@@ -612,6 +612,13 @@ where
     pub fn set_ths(&mut self, ths: u8) -> Result<(), Error<E>> {
         self.dev.write_reg(REG::reg_ths(), ths & THS_MASK)?;
         Ok(())
+    }
+
+    /// Threshold as f32,
+    /// `INTx_THS`: `THS`
+    #[cfg(feature = "out_f32")]
+    pub fn set_thsf(&mut self, ths: f32) -> Result<(), Error<E>> {
+        self.set_ths(self.dev.fs.convert_ths_f32tou8(ths))
     }
 
     /// Duration,

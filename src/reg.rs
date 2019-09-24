@@ -149,8 +149,8 @@ pub enum FullScale {
 
 impl FullScale {
     #[cfg(feature = "out_f32")]
-    pub(crate) fn convert_i16tof32(self, val: i16) -> f32 {
-        // mg/digit for high-resolution mode (12-bit)
+    pub(crate) fn convert_out_i16tof32(self, val: i16) -> f32 {
+        // g/digit for high-resolution mode (12-bit)
         let sens: f32 = match self {
             Self::G2 => 0.001,
             Self::G4 => 0.002,
@@ -159,6 +159,24 @@ impl FullScale {
         };
         // up to 12-bit data, left-justified
         f32(val >> 4) * sens
+    }
+    #[cfg(feature = "out_f32")]
+    pub(crate) fn convert_ths_f32tou8(self, val: f32) -> u8 {
+        // 1LSb = x g
+        let lsb: f32 = match self {
+            Self::G2 => 0.016,
+            Self::G4 => 0.032,
+            Self::G8 => 0.062,
+            Self::G16 => 0.186,
+        };
+        let f = val / lsb; // .round(); can not be used with no_std for now
+        if f < 0.0 {
+            0
+        } else if f > 127.0 {
+            0x7F
+        } else {
+            f as u8
+        }
     }
 }
 
@@ -197,7 +215,7 @@ pub const XDA: u8 = 0b0000_0001;
 
 pub const FM_MASK: u8 = 0b1100_0000;
 
-/// Full-scale selection
+/// FIFO mode selection
 #[derive(Copy, Clone)]
 pub enum FifoMode {
     /// Bypass mode
