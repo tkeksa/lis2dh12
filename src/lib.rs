@@ -337,6 +337,123 @@ where
         Ok(())
     }
 
+    /// Disable click interrupt,
+    /// `CLICK_CFG` clean all bits
+    pub fn disable_click(&mut self) -> Result<(), Error<E>> {
+        self.write_reg(Register::CLICK_CFG, 0x00)?;
+        Ok(())
+    }
+
+    /// Enable interrupt double-click on X,Y,Z axis,
+    /// `CLICK_CFG`: `XD`, `YD`, `ZD`
+    pub fn enable_double_click(&mut self, (x, y, z): (bool, bool, bool)) -> Result<(), Error<E>> {
+        self.modify_reg(Register::CLICK_CFG, |mut v| {
+            v &= !(XD | YD | ZD); // disable all axises
+            v |= if x { XD } else { 0 };
+            v |= if y { YD } else { 0 };
+            v |= if z { ZD } else { 0 };
+            v
+        })?;
+        Ok(())
+    }
+
+    /// Enable interrupt single-click on X,Y,Z axis,
+    /// `CLICK_CFG`: `XS`, `YS`, `ZS`
+    pub fn enable_single_click(&mut self, (x, y, z): (bool, bool, bool)) -> Result<(), Error<E>> {
+        self.modify_reg(Register::CLICK_CFG, |mut v| {
+            v &= !(XS | YS | ZS); // disable all axises
+            v |= if x { XS } else { 0 };
+            v |= if y { YS } else { 0 };
+            v |= if z { ZS } else { 0 };
+            v
+        })?;
+        Ok(())
+    }
+
+    /// Click source,
+    /// `CLICK_SRC` decoded as ((`DClick`, `SClick`), `Sign`, (`X`, `Y`, `Z`))
+    #[allow(clippy::type_complexity)]
+    pub fn get_click_src(
+        &mut self,
+    ) -> Result<Option<((bool, bool), bool, (bool, bool, bool))>, Error<E>> {
+        let reg = self.read_reg(Register::CLICK_SRC)?;
+        if (reg & IA) != 0 {
+            Ok(Some((
+                ((reg & DClick) != 0, (reg & SClick) != 0),
+                (reg & Sign) != 0,
+                ((reg & X) != 0, (reg & Y) != 0, (reg & Z) != 0),
+            )))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// If the LIR_Click bit is not set, the interrupt is kept high
+    /// for the duration of the latency window.
+    /// If the LIR_Click bit is set, the interrupt is kept high
+    /// until the CLICK_SRC (39h) register is read.
+    /// `CLICK_THS`: `LIR_Click`
+    pub fn enable_lir_click(&mut self, latch: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CLICK_THS, LIR_Click, latch)?;
+        Ok(())
+    }
+
+    /// Click threshold,
+    /// `CLICK_THS`: `Ths`
+    pub fn set_click_ths(&mut self, ths: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::CLICK_THS, ths & THS_MASK)?;
+        Ok(())
+    }
+
+    /// Click threshold as f32,
+    /// `CLICK_THS`: `Ths`
+    #[cfg(feature = "out_f32")]
+    pub fn set_click_thsf(&mut self, ths: f32) -> Result<(), Error<E>> {
+        self.set_click_ths(self.fs.convert_ths_f32tou8(ths))
+    }
+
+    /// Click time limit,
+    /// `TIME_LIMIT`: `TLI`
+    pub fn set_time_limit(&mut self, tli: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::TIME_LIMIT, tli & TLI_MASK)?;
+        Ok(())
+    }
+
+    /// Click time latency,
+    /// `TIME_LATENCY`: `TLA`
+    pub fn set_time_latency(&mut self, tla: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::TIME_LATENCY, tla)?;
+        Ok(())
+    }
+
+    /// Click time window,
+    /// `TIME_WINDOW`: `TW`
+    pub fn set_time_window(&mut self, tw: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::TIME_WINDOW, tw)?;
+        Ok(())
+    }
+
+    /// Sleep-to-wake, return-to-sleep activation threshold in low-power mode,
+    /// `ACT_THS`: `Acth`
+    pub fn set_act_ths(&mut self, ths: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::ACT_THS, ths & Acth_MASK)?;
+        Ok(())
+    }
+
+    /// Sleep-to-wake, return-to-sleep activation threshold as f32,
+    /// `ACT_THS`: `Acth`
+    #[cfg(feature = "out_f32")]
+    pub fn set_act_thsf(&mut self, ths: f32) -> Result<(), Error<E>> {
+        self.set_act_ths(self.fs.convert_ths_f32tou8(ths))
+    }
+
+    /// Sleep-to-wake, return-to-sleep duration,
+    /// `ACT_DUR`: `ActD`
+    pub fn set_act_dur(&mut self, d: u8) -> Result<(), Error<E>> {
+        self.write_reg(Register::ACT_DUR, d)?;
+        Ok(())
+    }
+
     /// Temperature sensor enable,
     /// `TEMP_CFG_REG`: `TEMP_EN`,
     /// the `BDU` bit in `CTRL_REG4` is also set
@@ -622,7 +739,7 @@ where
     }
 
     /// Duration,
-    /// `INTx_SRC`: `D`
+    /// `INTx_DURATION`: `D`
     pub fn set_duration(&mut self, d: u8) -> Result<(), Error<E>> {
         self.dev.write_reg(REG::reg_duration(), d & D_MASK)?;
         Ok(())

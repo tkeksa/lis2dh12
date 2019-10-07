@@ -272,6 +272,36 @@ pub const THS_MASK: u8 = 0b0111_1111;
 
 pub const D_MASK: u8 = 0b0111_1111;
 
+// === CLICK_CFG (38h) ===
+
+pub const ZD: u8 = 0b0010_0000;
+pub const ZS: u8 = 0b0001_0000;
+pub const YD: u8 = 0b0000_1000;
+pub const YS: u8 = 0b0000_0100;
+pub const XD: u8 = 0b0000_0010;
+pub const XS: u8 = 0b0000_0001;
+
+// === CLICK_SRC (39h) ===
+
+pub const DClick: u8 = 0b0010_0000;
+pub const SClick: u8 = 0b0001_0000;
+pub const Sign: u8 = 0b0000_1000;
+pub const Z: u8 = 0b0000_0100;
+pub const Y: u8 = 0b0000_0010;
+pub const X: u8 = 0b0000_0001;
+
+// === CLICK_THS (3Ah) ===
+
+pub const LIR_Click: u8 = 0b1000_0000;
+
+// === TIME_LIMIT (3Bh) ===
+
+pub const TLI_MASK: u8 = 0b0111_1111;
+
+// === ACT_THS (3Eh) ===
+
+pub const Acth_MASK: u8 = 0b0111_1111;
+
 // *** INT registers ***
 
 pub trait IntRegs {
