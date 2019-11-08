@@ -19,7 +19,7 @@ default = []
 out_f32 = []
 
 [dependencies]
-accelerometer = "0.7"
+accelerometer = "0.8"
 embedded-hal = "0.2"
 
 [dependencies.cast]

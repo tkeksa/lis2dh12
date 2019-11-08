@@ -6,7 +6,7 @@
 [![dependency status][deps-image]][deps-link]
 ![MIT licensed][license-image]
 
-Platform-agnostic Rust driver for the LIS2DH12 accelerometer
+Platform-agnostic Rust driver for the ST 3-axis MEMS accelerometer LIS2DH12
 
 ## Resources
 - [LIS2DH12 product page][product-page]
