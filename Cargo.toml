@@ -11,6 +11,10 @@ keywords = ["accelerometer", "sensor", "i2c", "driver", "embedded-hal-driver"]
 categories = ["embedded", "hardware-support", "no-std"]
 edition = "2018"
 
+exclude = [
+  ".github",
+]
+
 [package.metadata.docs.rs]
 all-features = true
 
