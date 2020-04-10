@@ -16,13 +16,16 @@ use core::fmt::Debug;
 use core::marker::PhantomData;
 
 #[cfg(feature = "out_f32")]
-pub use accelerometer::F32x3;
-pub use accelerometer::{Accelerometer, Error, ErrorKind, I16x3};
+pub use accelerometer::vector::F32x3;
+pub use accelerometer::vector::I16x3;
+pub use accelerometer::{Accelerometer, Error, ErrorKind, RawAccelerometer};
 use cast::u16;
 #[cfg(feature = "out_f32")]
 use cast::{f32, i16};
 use embedded_hal as hal;
 use hal::blocking::i2c::{Write, WriteRead};
+#[cfg(feature = "out_f32")]
+use num_traits::FromPrimitive;
 
 use crate::reg::*;
 pub use crate::reg::{Aoi6d, FifoMode, FullScale, Mode, Odr};
@@ -485,7 +488,7 @@ where
     /// Temperature sensor data as float,
     /// `OUT_TEMP_H`, `OUT_TEMP_L` converted to `f32`
     #[cfg(feature = "out_f32")]
-    pub fn get_temp_outf(&mut self) -> Result<(f32), Error<E>> {
+    pub fn get_temp_outf(&mut self) -> Result<f32, Error<E>> {
         let (out_h, out_l) = self.get_temp_out()?;
         // 10-bit resolution
         let value = (i16(out_h) << 2) | i16(out_l >> 6);
@@ -612,15 +615,15 @@ where
     }
 }
 
-impl<I2C, E> Accelerometer<I16x3> for Lis2dh12<I2C>
+impl<I2C, E> RawAccelerometer<I16x3> for Lis2dh12<I2C>
 where
     I2C: WriteRead<Error = E> + Write<Error = E>,
     E: Debug,
 {
-    type Error = Error<E>;
+    type Error = E;
 
     /// Get acceleration reading from the accelerometer
-    fn acceleration(&mut self) -> Result<I16x3, Error<E>> {
+    fn accel_raw(&mut self) -> Result<I16x3, Error<E>> {
         let mut buf = [0u8; 6];
         self.read_regs(Register::OUT_X_L, &mut buf)?;
 
@@ -633,22 +636,47 @@ where
 }
 
 #[cfg(feature = "out_f32")]
-impl<I2C, E> Accelerometer<F32x3> for Lis2dh12<I2C>
+impl<I2C, E> Accelerometer for Lis2dh12<I2C>
 where
     I2C: WriteRead<Error = E> + Write<Error = E>,
     E: Debug,
 {
-    type Error = Error<E>;
+    type Error = E;
 
-    /// Get acceleration reading from the accelerometer
-    fn acceleration(&mut self) -> Result<F32x3, Error<E>> {
-        let acc: I16x3 = self.acceleration()?;
+    /// Get normalized ±g reading from the accelerometer
+    fn accel_norm(&mut self) -> Result<F32x3, Error<E>> {
+        let acc_raw: I16x3 = self.accel_raw()?;
 
         Ok(F32x3::new(
-            self.fs.convert_out_i16tof32(acc.x),
-            self.fs.convert_out_i16tof32(acc.y),
-            self.fs.convert_out_i16tof32(acc.z),
+            self.fs.convert_out_i16tof32(acc_raw.x),
+            self.fs.convert_out_i16tof32(acc_raw.y),
+            self.fs.convert_out_i16tof32(acc_raw.z),
         ))
+    }
+
+    /// Get sample rate of accelerometer in Hz
+    fn sample_rate(&mut self) -> Result<f32, Error<Self::Error>> {
+        let creg1 = self.read_reg(Register::CTRL_REG1)?;
+        let rate = match FromPrimitive::from_u8(creg1 >> 4) {
+            Some(Odr::PowerDown) => 0.0,
+            Some(Odr::Hz1) => 1.0,
+            Some(Odr::Hz10) => 10.0,
+            Some(Odr::Hz25) => 25.0,
+            Some(Odr::Hz50) => 50.0,
+            Some(Odr::Hz100) => 100.0,
+            Some(Odr::Hz200) => 200.0,
+            Some(Odr::Hz400) => 400.0,
+            Some(Odr::HighRate0) => 1620.0,
+            Some(Odr::HighRate1) => {
+                if creg1 & LPen == 0 {
+                    1344.0
+                } else {
+                    5376.0
+                }
+            }
+            None => 0.0,
+        };
+        Ok(rate)
     }
 }
 

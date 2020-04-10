@@ -2,6 +2,8 @@
 
 #[cfg(feature = "out_f32")]
 use cast::f32;
+#[cfg(feature = "out_f32")]
+use num_derive::FromPrimitive;
 
 /// I2C slave address
 pub const I2C_SAD: u8 = 0b001_1000;
@@ -90,6 +92,7 @@ pub const ODR_MASK: u8 = 0b1111_0000;
 
 /// Output Data Rate
 #[derive(Copy, Clone)]
+#[cfg_attr(feature = "out_f32", derive(FromPrimitive))]
 pub enum Odr {
     /// Power-down mode
     PowerDown = 0b0000,
