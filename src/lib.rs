@@ -9,6 +9,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 #![no_std]
+#![forbid(unsafe_code)]
 
 mod reg;
 
