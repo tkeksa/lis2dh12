@@ -233,6 +233,10 @@ pub enum FifoMode {
 
 pub const FTH_MASK: u8 = 0b0001_1111;
 
+// === FIFO_SRC_REG (2Fh) ===
+
+pub const FSS: u8 = 0b0001_1111;
+
 // === INT1_CFG (30h), INT2_CFG (34h) ===
 
 pub const AOI_6D_MASK: u8 = 0b1100_0000;
