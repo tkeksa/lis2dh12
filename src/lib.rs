@@ -193,6 +193,12 @@ where
         Ok(())
     }
 
+    /// Get the amount of samples currently stored in the FIFO queue
+    pub fn get_stored_samples(&mut self) -> Result<u8, Error<E>> {
+        let value = self.read_reg(Register::FIFO_SRC_REG)?;
+        Ok(value & FSS)
+    }
+
     /// FIFO overrun on `INT1` pin,
     /// `CTRL_REG3`: `I1_OVERRUN`
     pub fn enable_i1_overrun(&mut self, enable: bool) -> Result<(), Error<E>> {
@@ -563,6 +569,18 @@ where
             w,
             "INT1_THS (32h) = {:#010b}",
             self.read_reg(Register::INT1_THS)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "FIFO_SRC_REG (2Fh) = {:#010b}",
+            self.read_reg(Register::FIFO_SRC_REG)?
+        )
+        .unwrap();
+        writeln!(
+            w,
+            "FIFO_CTRL_REG (2Fh) = {:#010b}",
+            self.read_reg(Register::FIFO_CTRL_REG)?
         )
         .unwrap();
         Ok(())
