@@ -23,6 +23,7 @@ pub enum Mode {
 /// Register mapping
 #[allow(dead_code)]
 #[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Copy, Clone)]
 pub enum Register {
     STATUS_REG_AUX = 0x07,
