@@ -69,6 +69,7 @@ pub struct Lis2dh12<I2C> {
     /// The I²C device slave address
     addr: u8,
     /// Current full-scale
+    #[cfg(feature = "out_f32")]
     fs: FullScale,
 }
 
@@ -88,6 +89,7 @@ where
         let mut dev = Self {
             i2c,
             addr: addr.addr(),
+            #[cfg(feature = "out_f32")]
             fs: FullScale::G2,
         };
 
@@ -158,6 +160,7 @@ where
         Ok(())
     }
 
+    /// Enable high-pass filter for CLICK/IA2/IA1
     pub fn enable_hp_filter(&mut self, click: bool, ia2: bool, ia1: bool) -> Result<(), Error<E>> {
         self.modify_reg(Register::CTRL_REG2, |mut v| {
             v &= !(HPCLICK | HP_IA2 | HP_IA1); // disable all filters
@@ -228,7 +231,10 @@ where
     /// `CTRL_REG4`: `FS`
     pub fn set_fs(&mut self, fs: FullScale) -> Result<(), Error<E>> {
         self.modify_reg(Register::CTRL_REG4, |v| (v & !FS_MASK) | ((fs as u8) << 4))?;
-        self.fs = fs;
+        #[cfg(feature = "out_f32")]
+        {
+            self.fs = fs;
+        }
         Ok(())
     }
 
