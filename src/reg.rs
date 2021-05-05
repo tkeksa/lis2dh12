@@ -91,6 +91,12 @@ pub const TEMP_EN: u8 = 0b1100_0000;
 
 pub const ODR_MASK: u8 = 0b1111_0000;
 
+// === CTRL_REG2 (21h) ===
+
+pub const HPCLICK: u8 = 0b0000_0100;
+pub const HP_IA2: u8 = 0b0000_0010;
+pub const HP_IA1: u8 = 0b0000_0001;
+
 /// Output Data Rate
 #[derive(Copy, Clone)]
 #[cfg_attr(feature = "out_f32", derive(FromPrimitive))]

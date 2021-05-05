@@ -158,6 +158,17 @@ where
         Ok(())
     }
 
+    pub fn enable_hp_filter(&mut self, click: bool, ia2: bool, ia1: bool) -> Result<(), Error<E>> {
+        self.modify_reg(Register::CTRL_REG2, |mut v| {
+            v &= !(HPCLICK | HP_IA2 | HP_IA1); // disable all filters
+            v |= if click { HPCLICK } else { 0 };
+            v |= if ia2 { HP_IA2 } else { 0 };
+            v |= if ia1 { HP_IA1 } else { 0 };
+            v
+        })?;
+        Ok(())
+    }
+
     /// `CLICK` interrupt on `INT1` pin,
     /// `CTRL_REG3`: `I1_CLICK`
     pub fn enable_i1_click(&mut self, enable: bool) -> Result<(), Error<E>> {
