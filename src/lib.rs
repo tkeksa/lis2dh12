@@ -540,6 +540,21 @@ where
         Int::new(self)
     }
 
+    /// Resets all registers to their default
+    pub fn reset(&mut self) -> Result<(), Error<E>> {
+        self.write_reg(Register::CTRL_REG1, CTRL_REG1_DEFAULT)?;
+        self.write_reg(Register::CTRL_REG2, CTRL_REG2_DEFAULT)?;
+        self.write_reg(Register::CTRL_REG3, CTRL_REG3_DEFAULT)?;
+        self.write_reg(Register::CTRL_REG4, CTRL_REG4_DEFAULT)?;
+        self.write_reg(Register::CTRL_REG5, CTRL_REG5_DEFAULT)?;
+        self.write_reg(Register::CTRL_REG6, CTRL_REG6_DEFAULT)?;
+        self.write_reg(Register::INT1_CFG, INT_CFG_DEFAULT)?;
+        self.write_reg(Register::INT2_CFG, INT_CFG_DEFAULT)?;
+        self.write_reg(Register::INT1_THS, INT_THS_DEFAULT)?;
+        self.write_reg(Register::INT2_THS, INT_THS_DEFAULT)?;
+        Ok(())
+    }
+
     /// Dump registers
     #[cfg(debug_assertions)]
     pub fn dump_regs<W>(&mut self, w: &mut W) -> Result<(), Error<E>>
