@@ -90,12 +90,14 @@ pub const TEMP_EN: u8 = 0b1100_0000;
 // === CTRL_REG1 (20h) ===
 
 pub const ODR_MASK: u8 = 0b1111_0000;
+pub const CTRL_REG1_DEFAULT: u8 = 0b0000_0111;
 
 // === CTRL_REG2 (21h) ===
 
 pub const HPCLICK: u8 = 0b0000_0100;
 pub const HP_IA2: u8 = 0b0000_0010;
 pub const HP_IA1: u8 = 0b0000_0001;
+pub const CTRL_REG2_DEFAULT: u8 = 0b0000_0000;
 
 /// Output Data Rate
 #[derive(Copy, Clone)]
@@ -137,12 +139,14 @@ pub const I1_IA2: u8 = 0b0010_0000;
 pub const I1_ZYXDA: u8 = 0b0001_0000;
 pub const I1_WTM: u8 = 0b0000_0100;
 pub const I1_OVERRUN: u8 = 0b0000_0010;
+pub const CTRL_REG3_DEFAULT: u8 = 0b0000_0000;
 
 // === CTRL_REG4 (23h) ===
 
 pub const BDU: u8 = 0b1000_0000;
 
 pub const FS_MASK: u8 = 0b0011_0000;
+pub const CTRL_REG4_DEFAULT: u8 = 0b0000_0000;
 
 /// Full-scale selection
 #[derive(Copy, Clone)]
@@ -200,6 +204,7 @@ pub const LIR_INT1: u8 = 0b0000_1000;
 pub const D4D_INT1: u8 = 0b0000_0100;
 pub const LIR_INT2: u8 = 0b0000_0010;
 pub const D4D_INT2: u8 = 0b0000_0001;
+pub const CTRL_REG5_DEFAULT: u8 = 0b0000_0000;
 
 // === CTRL_REG6 (25h) ===
 
@@ -209,6 +214,7 @@ pub const I2_IA2: u8 = 0b0010_0000;
 pub const I2_BOOT: u8 = 0b0001_0000;
 pub const I2_ACT: u8 = 0b0000_1000;
 pub const INT_POLARITY: u8 = 0b0000_0010;
+pub const CTRL_REG6_DEFAULT: u8 = 0b0000_0000;
 
 // === STATUS_REG (27h) ===
 
@@ -247,6 +253,8 @@ pub const FSS: u8 = 0b0001_1111;
 // === INT1_CFG (30h), INT2_CFG (34h) ===
 
 pub const AOI_6D_MASK: u8 = 0b1100_0000;
+pub const INT_CFG_DEFAULT: u8 = 0b0000_0000;
+pub const INT_THS_DEFAULT: u8 = 0b0000_0000;
 
 /// AOI-6D Interrupt mode
 #[derive(Copy, Clone)]
