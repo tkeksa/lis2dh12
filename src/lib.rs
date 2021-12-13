@@ -555,6 +555,18 @@ where
         Ok(())
     }
 
+    /// Enable self test 0, this shouldn't be enabled at the same time as self test 1
+    pub fn enable_st0(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG4, ST0, enable)?;
+        Ok(())
+    }
+
+    /// Enable self test 1, this shouldn't be enabled at the same time as self test 0
+    pub fn enable_st1(&mut self, enable: bool) -> Result<(), Error<E>> {
+        self.reg_xset_bits(Register::CTRL_REG4, ST1, enable)?;
+        Ok(())
+    }
+
     /// Dump registers
     #[cfg(debug_assertions)]
     pub fn dump_regs<W>(&mut self, w: &mut W) -> Result<(), Error<E>>
