@@ -144,7 +144,8 @@ pub const CTRL_REG3_DEFAULT: u8 = 0b0000_0000;
 // === CTRL_REG4 (23h) ===
 
 pub const BDU: u8 = 0b1000_0000;
-
+pub const ST0: u8 = 0b0000_0010;
+pub const ST1: u8 = 0b0000_0100;
 pub const FS_MASK: u8 = 0b0011_0000;
 pub const CTRL_REG4_DEFAULT: u8 = 0b0000_0000;
 
