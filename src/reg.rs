@@ -1,6 +1,6 @@
 #![allow(non_upper_case_globals)]
 
-#[cfg(feature = "out_f32")]
+#[cfg(all(feature = "out_f32", feature = "sync"))]
 use cast::f32;
 #[cfg(feature = "out_f32")]
 use num_derive::FromPrimitive;
@@ -163,7 +163,7 @@ pub enum FullScale {
 }
 
 impl FullScale {
-    #[cfg(feature = "out_f32")]
+    #[cfg(all(feature = "out_f32", feature = "sync"))]
     pub(crate) fn convert_out_i16tof32(self, val: i16) -> f32 {
         // g/digit for high-resolution mode (12-bit)
         let sens: f32 = match self {
