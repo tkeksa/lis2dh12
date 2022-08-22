@@ -11,21 +11,22 @@ keywords = ["accelerometer", "sensor", "i2c", "driver", "embedded-hal-driver"]
 categories = ["embedded", "hardware-support", "no-std"]
 edition = "2018"
 
-exclude = [
-  ".github",
-]
+exclude = [".github"]
 
 [package.metadata.docs.rs]
 all-features = true
 
 [features]
-default = []
+default = ["sync"]
 out_f32 = ["num-traits", "num-derive"]
+async = ["embedded-hal-async"]
+sync = ["embedded-hal"]
 
 [dependencies]
 accelerometer = "0.12.0"
-embedded-hal = "0.2.6"
-cast = {version = "0.3.0", default-features = false }
+embedded-hal = { version = "0.2.6", optional = true }
+embedded-hal-async = { version = "0.1.0-alpha.1", optional = true }
+cast = { version = "0.3.0", default-features = false }
 num-traits = { version = "0.2.14", optional = true, default-features = false }
 num-derive = { version = "0.3.3", optional = true }
 
