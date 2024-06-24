@@ -522,8 +522,8 @@ impl<I2C: I2c> Lis2dh12<I2C> {
     pub fn get_temp_outf(&mut self) -> Result<f32, Error<I2C::Error>> {
         let (out_h, out_l) = self.get_temp_out()?;
         // 10-bit resolution
-        let value = (i16(out_h) << 2) | i16(out_l >> 6);
-        Ok(f32(value) * 0.25)
+        let value = (i16(out_h) << 8) | i16(out_l);
+        Ok(25.0 + f32(value) / 256.0)
     }
 
     /// `REFERENCE` register
