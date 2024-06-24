@@ -73,6 +73,49 @@ pub struct Lis2dh12<I2C> {
     fs: FullScale,
 }
 
+/// Errors returned from the [detect_i2c_addr]
+#[derive(Debug)]
+pub enum AddrDetectionError<I2cError: Debug> {
+    /// Other I2C error trying to detect a device address.
+    I2c(I2cError),
+    /// Invalid device ID read from device.
+    InvalidDeviceId,
+}
+
+impl<I2cError: Debug> From<I2cError> for AddrDetectionError<I2cError> {
+    fn from(value: I2cError) -> Self {
+        AddrDetectionError::I2c(value)
+    }
+}
+
+/// This function tries to detect the I2C address of the device by scanning all possible I2C
+/// addresses.
+pub fn detect_i2c_addr<I2C: I2c>(
+    i2c: &mut I2C,
+) -> Result<SlaveAddr, AddrDetectionError<I2C::Error>> {
+    let mut buf = [0u8];
+    let write_buf = &[reg::Register::WHO_AM_I.addr()];
+    match i2c.write_read(reg::I2C_SAD | 0b1, write_buf, &mut buf) {
+        Ok(_) => {
+            if buf[0] == reg::DEVICE_ID {
+                return Ok(SlaveAddr::Alternative(true));
+            }
+            Err(AddrDetectionError::InvalidDeviceId)
+        }
+        Err(_) => {
+            let result = i2c.write_read(reg::I2C_SAD, write_buf, &mut buf);
+            if result.is_ok() {
+                if buf[0] == reg::DEVICE_ID {
+                    return Ok(SlaveAddr::Default);
+                } else {
+                    return Err(AddrDetectionError::InvalidDeviceId);
+                }
+            }
+            Err(result.unwrap_err().into())
+        }
+    }
+}
+
 /// Interrupt setting and status
 pub struct Int<'a, REG, I2C> {
     dev: &'a mut Lis2dh12<I2C>,
