@@ -26,7 +26,7 @@ Dual licensed under your choice of either of:
 [crate-link]: https://crates.io/crates/lis2dh12
 [docs-image]: https://docs.rs/lis2dh12/badge.svg
 [docs-link]: https://docs.rs/lis2dh12/
-[build-image]: https://github.com/tkeksa/lis2dh12/workflows/ci/badge.svg?tag=0.6.7
+[build-image]: https://github.com/tkeksa/lis2dh12/workflows/ci/badge.svg?tag=0.7.0
 [build-link]: https://github.com/tkeksa/lis2dh12/actions
 [deps-image]: https://deps.rs/repo/github/tkeksa/lis2dh12/status.svg
 [deps-link]: https://deps.rs/repo/github/tkeksa/lis2dh12
