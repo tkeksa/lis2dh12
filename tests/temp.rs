@@ -110,22 +110,22 @@ fn temp_outf() {
     let mut dev = Lis2dh12::new(mock, SlaveAddr::Default).unwrap();
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 0f32);
+    assert_eq!(out, 25f32);
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 0.25f32);
+    assert_eq!(out, 25.25f32);
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, -0.25f32);
+    assert_eq!(out, 24.75f32);
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 1f32);
+    assert_eq!(out, 26f32);
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, -1f32);
+    assert_eq!(out, 24f32);
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 127.75f32);
+    assert_eq!(out, 152.75f32);
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, -128f32);
+    assert_eq!(out, -103f32);
 
     dev.destroy().done();
 }
