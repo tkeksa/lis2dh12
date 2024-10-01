@@ -1,7 +1,7 @@
 [package]
 name = "lis2dh12"
 version = "0.7.0"
-authors = ["Tomas Kukosa <tkeksa@gmail.com>"]
+authors = ["Tomas Kukosa <tkeksa@gmail.com>", "Robin Mueller <muellerr@irs.uni-stuttgart.de>"]
 repository = "https://github.com/tkeksa/lis2dh12"
 documentation = "https://docs.rs/lis2dh12"
 license = "Apache-2.0 OR MIT"
@@ -24,10 +24,10 @@ out_f32 = ["num-traits", "num-derive"]
 
 [dependencies]
 accelerometer = "0.12.0"
-embedded-hal = "1"
+embedded-hal = "1.0.0"
 cast = {version = "0.3.0", default-features = false }
-num-traits = { version = "0.2.17", optional = true, default-features = false }
-num-derive = { version = "0.4.1", optional = true }
+num-traits = { version = "0.2.19", optional = true, default-features = false }
+num-derive = { version = "0.4.2", optional = true }
 
 [dev-dependencies]
 embedded-hal-mock = "0.11.1"
