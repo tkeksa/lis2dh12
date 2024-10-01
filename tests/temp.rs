@@ -1,5 +1,7 @@
 mod common;
 
+#[cfg(feature = "out_f32")]
+use cast::{f32, i16};
 use common::*;
 
 #[test]
@@ -92,6 +94,12 @@ fn temp_out() {
     dev.destroy().done();
 }
 
+#[cfg(feature = "out_f32")]
+fn formula_float(out_h: u8, out_l: u8) -> f32 {
+    let value = (i16(out_h) << 8) | i16(out_l);
+    25.0 + f32(value) / 256.0
+}
+
 #[test]
 #[cfg(feature = "out_f32")]
 fn temp_outf() {
@@ -110,22 +118,24 @@ fn temp_outf() {
     let mut dev = Lis2dh12::new(mock, SlaveAddr::Default).unwrap();
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 0f32);
+    let expected = formula_float(0x00, 0x00);
+    assert_eq!(expected, 25f32);
+    assert_eq!(out, expected);
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 0.25f32);
+    assert_eq!(out, formula_float(0x0, 0x40));
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, -0.25f32);
+    assert_eq!(out, formula_float(0xFF, 0xC0));
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 1f32);
+    assert_eq!(out, formula_float(0x01, 0x00));
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, -1f32);
+    assert_eq!(out, formula_float(0xFF, 0x00));
 
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, 127.75f32);
+    assert_eq!(out, formula_float(0x7F, 0xC0));
     let out = dev.get_temp_outf().unwrap();
-    assert_eq!(out, -128f32);
+    assert_eq!(out, formula_float(0x80, 0x00));
 
     dev.destroy().done();
 }
