@@ -94,6 +94,7 @@ pub const CTRL_REG1_DEFAULT: u8 = 0b0000_0111;
 
 // === CTRL_REG2 (21h) ===
 
+pub const FDS: u8 = 0b0000_1000;
 pub const HPCLICK: u8 = 0b0000_0100;
 pub const HP_IA2: u8 = 0b0000_0010;
 pub const HP_IA1: u8 = 0b0000_0001;
