@@ -202,12 +202,14 @@ impl<I2C: I2c> Lis2dh12<I2C> {
     /// Enable high-pass filter for CLICK/IA2/IA1
     pub fn enable_hp_filter(
         &mut self,
+        fds: bool,
         click: bool,
         ia2: bool,
         ia1: bool,
     ) -> Result<(), Error<I2C::Error>> {
         self.modify_reg(Register::CTRL_REG2, |mut v| {
-            v &= !(HPCLICK | HP_IA2 | HP_IA1); // disable all filters
+            v &= !(FDS | HPCLICK | HP_IA2 | HP_IA1); // disable all filters
+            v |= if fds { FDS } else { 0 };
             v |= if click { HPCLICK } else { 0 };
             v |= if ia2 { HP_IA2 } else { 0 };
             v |= if ia1 { HP_IA1 } else { 0 };
