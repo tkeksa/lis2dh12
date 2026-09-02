@@ -1,3 +1,6 @@
+// The blocking tests use `Lis2dh12` via this glob, the async tests bring in
+// `asynch::Lis2dh12` themselves and leave this one unused.
+#[allow(unused_imports)]
 pub use lis2dh12::{Lis2dh12, SlaveAddr};
 
 use embedded_hal_mock as hal;
