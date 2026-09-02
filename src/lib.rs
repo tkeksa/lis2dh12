@@ -27,6 +27,7 @@ pub use accelerometer::{Accelerometer, Error, ErrorKind, RawAccelerometer};
 pub use crate::reg::{Aoi6d, FifoMode, FullScale, Mode, Odr};
 
 /// Possible slave addresses
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SlaveAddr {
     /// Default slave address
     Default,
@@ -46,6 +47,7 @@ impl SlaveAddr {
 /// Data status structure,
 /// decoded from STATUS_REG register
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct DataStatus {
     /// ZYXOR bit
     pub zyxor: bool,
@@ -59,6 +61,7 @@ pub struct DataStatus {
 
 /// Errors returned from `detect_i2c_addr`
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum AddrDetectionError<I2cError: Debug> {
     /// Other I2C error trying to detect a device address.
     I2c(I2cError),

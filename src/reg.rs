@@ -11,6 +11,7 @@ pub const I2C_SAD: u8 = 0b001_1000;
 pub const I2C_SUB_MULTI: u8 = 0b1000_0000;
 
 /// Operating mode
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Mode {
     /// High-resolution mode (12-bit data output)
     HighResolution,
@@ -102,6 +103,7 @@ pub const CTRL_REG2_DEFAULT: u8 = 0b0000_0000;
 /// Output Data Rate
 #[derive(Copy, Clone)]
 #[cfg_attr(feature = "out_f32", derive(FromPrimitive))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Odr {
     /// Power-down mode
     PowerDown = 0b0000,
@@ -151,6 +153,7 @@ pub const CTRL_REG4_DEFAULT: u8 = 0b0000_0000;
 
 /// Full-scale selection
 #[derive(Copy, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum FullScale {
     /// ±2 g
     G2 = 0b00,
@@ -234,6 +237,7 @@ pub const FM_MASK: u8 = 0b1100_0000;
 
 /// FIFO mode selection
 #[derive(Copy, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum FifoMode {
     /// Bypass mode
     Bypass = 0b00,
@@ -259,6 +263,7 @@ pub const INT_THS_DEFAULT: u8 = 0b0000_0000;
 
 /// AOI-6D Interrupt mode
 #[derive(Copy, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Aoi6d {
     /// OR combination of interrupt events
     Or = 0b00,
