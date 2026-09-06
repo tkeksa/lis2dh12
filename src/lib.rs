@@ -581,12 +581,12 @@ impl<I2C: I2c> Lis2dh12<I2C> {
     }
 
     /// INT1
-    pub fn int1(&mut self) -> Int<Int1Regs, I2C> {
+    pub fn int1(&mut self) -> Int<'_, Int1Regs, I2C> {
         Int::new(self)
     }
 
     /// INT2
-    pub fn int2(&mut self) -> Int<Int2Regs, I2C> {
+    pub fn int2(&mut self) -> Int<'_, Int2Regs, I2C> {
         Int::new(self)
     }
 
